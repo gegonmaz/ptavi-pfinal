@@ -1,27 +1,9 @@
-# Tendremos que expresar que se trata de un fichero xml y su version
-# Luego trabajaremos con las etiquetas que nos proporciona la practica
-
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
-    <account>
-        <username>HarleyQuinn@ua.org</username>
-        <passwd>escuadronsuicida12345</passwd>
-    </account>        
-    <uaserver>
-        <ip>127.0.0.1</ip>
-        <puerto>5555</puerto>
-    </uaserver>
-    <rtpaudio>
-        <puerto>3333</puerto>
-    </rtpaudio>
-    <regproxy>
-        <ip>127.0.0.1</ip>
-        <puerto>23032</puerto>
-    </regproxy>
-    <log>
-        <path>localizacion_fichero</path>
-    </log>
-    <audio>
-        <path>localizacion_fichero</path>
-    </audio>
+    <account username="HarleyQuinn@ua.org" passwd="escuadronsuicida12345"/>
+    <uaserver ip="127.0.0.1" puerto="5060"/>
+    <rtpaudio puerto="3333"/>
+    <regproxy ip="127.0.0.1" puerto="23032"/>
+    <log path="log.json"/>
+    <audio path="cancion.mp3"/>
 </config>
