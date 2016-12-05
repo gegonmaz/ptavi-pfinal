@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config>
+    <server>
+        <name></name>
+        <ip>127.0.0.1</ip>
+        <puerto>23032</puerto>
+    </server>
+    <database>
+        <path></path>
+        <passwdpath></passwordpath>
+    </database>
+    <log>
+        <path></path>
+    </log>
+</configure>
