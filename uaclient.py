@@ -4,80 +4,65 @@
 Clase (y programa principal) para un cliente-servidor
 """
 
-import socketserver
-import sys
+""" 
+Agente del cliente
+"""
 
-# este comando nos servirá para capturar los datos de la shell
+import socket
+import sys
 import csv
 import urllib.request
 import json
 import time
+import logging
+from xml.sax import make_parser
+from xml.sax.handler import ContentHandler
 
-def lista_etiquetas(misdatos):
+class UAClientHandler(ContentHandler):
 
-    listado = ""
-    for etiqueta in misdatos:
-        listado = listado + etiqueta[0]
-        atribs = etiqueta[1].items()
-        for atrib, contenido in atribs:
-            if contenido != "":
-                listado = listado + "\t" + atrib + "=" + '"' + contenido + '"'
-        listado = listado + "\n"
-    return listado
-
-
-def to_json(misdatos):
 """
-    Podremos utilizar este metodo para los archivos log
-"""
-    with open('log.json', 'w') as outfile_json:
-            json.dump(misdatos, outfile_json, sort_keys=True, indent=3, 
-            separators=(' ', ': '))
-
-
-def info_ua(misdatos):
-
-    list_ua = []
-    for etiqueta in misdatos:
-        atribs = etiqueta[1].items()
-        for atrib, contenido in atribs:
-            
-            
-
-            if atrib == "username":
-                Nombre_usuario = contenido
-                list_ua = Nombre_usuario
-            else atrib == "password"
-                Contraseña_usuario = contenido
-                # f = open (filename, "wb")
-                # f.write(passwords.read())
-                # Tendremos que asignar cada caontraseña al usuario que pertenece
-            if atrib == "ip"
-                Ip_servidor = contenido
-            else atrib == "puerto"
-                Puerto_servidor == contenido
-            if atrib == "puerto"
-                Puerto_proxy = contenido
-            if atrib == "ip"
-                Ip_regproxy = contenido
-            else atrib == "puerto"
-                Puerto_regproxy = contenido
-            if atrib == "path"
-                localizacion_log == contenido
-            if atrib == "path"
-                localizacion_cancion = contenido
-"""
-------------------------------------------------------------------------------
+User Agent del cliente
 """
 
+    """
+    Vamos a crear una funcion que se encargue de crear un diccionario con 
+    las etiquetas del archivo XML para ir guardando los datos.
+    """
+
+    def __init__(self):
+
+        self.listaEtiquetas = []
+        self.diccionarioConfig = {'account': ['username', 'password'],
+                                  'uaserver': ['ip', 'puerto'],
+                                  'rtpaudio': ['puerto'],
+                                  'regproxy': ['ip', 'puerto'],
+                                  'log': ['path'],
+                                  'audio': ['path']}
+
+    """
+    Vamos a tener que inicializar todos los elementos(etiquetas) del 
+    diccionario creado anteriormente
+    """
+
+    """
+    Tendremos que crear un archivo log; de modo que si cae el servicio,
+    se pueda saber que usuarios estaban contectados en cada momento
+    """
+    def InicializacionElementos(self,name,attrs):
+        #Buscaremos las etiquetas en el diccionario
+        if name in self.diccionarioConfig:
+            Valores = {}
+            for etiquetas in self.diccionarioConfig[name]:
+                Valores[name] = attrs.get(etiquetas, '')
+            listaNombres = {name: Valores}
+            self.listaEtiquetas.append(listaNombres)
+
+    """
+    Una vez inicializadas, tendremos que crear alguna funcion que nos permita
+    acceder a las etiquetas
+    """
 
 
-                if remoto == "http:":
-                    arch_web = urllib.request.urlopen(url)
-                    filename = list_url[-1]
-                    print("Descargado..." + filename)
-                    f = open(filename, "wb")
-                    f.write(arch_web.read())
-                else:
-                    filename = contenido
-                print("Este contenido ya está en local... " + filename)
+
+if __name__ == "__main__":
+
