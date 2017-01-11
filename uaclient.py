@@ -123,7 +123,7 @@ User Agent del cliente
                                self.listaEtiquetas['uaserver']['puerto'] + \ 
                                ' SIP/2.0\r\n'
             lineaEnvio = cabeceraRegistro + c
-            self.send(lineaEnvio)
+            self.envioMensaje(lineaEnvio)
             print(lineaEnvio)
             # Pero tendrá que esperar respuesta
             mensajeServidor = my_socket.recv(1024).decode('utf-8')
@@ -131,7 +131,7 @@ User Agent del cliente
             """
             Ahora es cuando se registrara el usuario, por tanto tendra que 
             facilitar una contraseña. Que a su vez tambien tendremos que 
-            guardar en el archivo log
+            guardar en el archivo log. Se tendra que utilizar una funcion hash
             """
             if mensajeServidor == 'SIP/2.0 401 Unauthorized'
                 """
@@ -139,16 +139,34 @@ User Agent del cliente
                 tiempo de expiracion mas una cabecera con utenticacion
                 """
                 
-    def invitar(self, usuario)
+    def invitar(self, Usuario)
         """
         La cabecera acabara con Content-Type: application/sdp y el sdp
         """
-        tipo = 'Content-Type: application/sdp\r\n\r\n'
-        sdp = 'v=0\r\n' + 'o=' + diccionarioConfig['account']['username'] + \
-        ' ' + diccionarioConfig['uaserver']['ip'] + 's=misesion\r\n' + \
-        't=0\r\n'  + 'm=audio ' + diccionarioConfig['rtpaudio']['puerto'] + \
-        ' RTP\r\n'
-        lineaEnvio = Metodo + ' sip:' + Usuario + ' SIP/2.0\r\n' + tipo + sdp
+        if Metodo == 'INVITE':
+            tipo = 'Content-Type: application/sdp\r\n\r\n'
+            sdp = 'v=0\r\n' + 'o=' + diccionarioConfig['account']['username']+\ 
+            ' ' + diccionarioConfig['uaserver']['ip'] + 's=misesion\r\n' + \
+            't=0\r\n'  + 'm=audio ' + diccionarioConfig['rtpaudio']['puerto']+\
+            ' RTP\r\n'
+            lineaEnvio = Metodo + ' sip:' + Usuario + ' SIP/2.0\r\n' + tipo + \
+            sdp
+            self.envioMensaje(lineaEnvio)
+            print('Mensaje enviado: ' + lineaEnvio)
+
+            # y tendrá que esperar una respuesta del servidor
+            datos = my_socket.recv(1024)
+            
+
+    def asentimiento(self, Usuario)
+        if Metodo == 'ACK':
+            lineaEnvio = 'ACK sip:' + Usuario + ' SIP72.0'
+            self.envioMensaje(lineaEnvio)
+            print('Asentimiento: ' + lineaEnvio)
+
+    def desconexion(self, Usuario)
+        if Metodo == 'BYE':
+            lineaEnvio = 'BYE
 
 if __name__ == "__main__":
 
