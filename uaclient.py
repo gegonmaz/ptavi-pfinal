@@ -84,7 +84,7 @@ User Agent del cliente
         # Escribimos en el fichero
         ficheroEscritura = open(File, 'w')
         ficheroEscritura(''.join(lienas))
-        ficheroEscritura.close()    
+        ficheroEscritura.close()
 
     """
     Una vez inicializadas, tendremos que crear alguna funcion que nos permita
@@ -94,6 +94,14 @@ User Agent del cliente
     cHandler = UAClientHandler()
     parser.setContentHandler(cHandler)
     parser.parse(open(FicheroXML)
+    """
+    # Variables que necesitaremos en los siguientes metodos
+    IpProxy = handler.listaEtiquetas[3]['regproxy']['ip']
+    PuertoProxy = handler.listaEtiquetas[3]['regproxy']['puerto']
+    ArchivoLog = handler.listaEtiquetas[4]['log']['path']
+    Usuario = handler.listaEtiquetas[0]['account']['username']
+    ContraseñaUsuario = handler.listaEtiquetas[0]['account']['password']
+    """
 
     """
     Como vamos a tener que estar constantemente enviando los mensajes, 
@@ -112,10 +120,35 @@ User Agent del cliente
         if Metodo == 'REGITER':
             c = 'Expires: ' + str(TiempoExpiracion) + '\r\n\r\n'
             cabeceraRegistro = Metodo + 'sip: ' + 
-                               self.listaEtiquetas['uaserver']['puerto'] + 
+                               self.listaEtiquetas['uaserver']['puerto'] + \ 
                                ' SIP/2.0\r\n'
             lineaEnvio = cabeceraRegistro + c
             self.send(lineaEnvio)
+            print(lineaEnvio)
+            # Pero tendrá que esperar respuesta
+            mensajeServidor = my_socket.recv(1024).decode('utf-8')
+            print('El servidor manda: ' + mensajeServidor)
+            """
+            Ahora es cuando se registrara el usuario, por tanto tendra que 
+            facilitar una contraseña. Que a su vez tambien tendremos que 
+            guardar en el archivo log
+            """
+            if mensajeServidor == 'SIP/2.0 401 Unauthorized'
+                """
+                Al ser autorizado, en la cabecera se tendrá que enviar el 
+                tiempo de expiracion mas una cabecera con utenticacion
+                """
+                
+    def invitar(self, usuario)
+        """
+        La cabecera acabara con Content-Type: application/sdp y el sdp
+        """
+        tipo = 'Content-Type: application/sdp\r\n\r\n'
+        sdp = 'v=0\r\n' + 'o=' + diccionarioConfig['account']['username'] + \
+        ' ' + diccionarioConfig['uaserver']['ip'] + 's=misesion\r\n' + \
+        't=0\r\n'  + 'm=audio ' + diccionarioConfig['rtpaudio']['puerto'] + \
+        ' RTP\r\n'
+        lineaEnvio = Metodo + ' sip:' + Usuario + ' SIP/2.0\r\n' + tipo + sdp
 
 if __name__ == "__main__":
 
