@@ -1,13 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Clase (y programa principal) para un cliente-servidor
-"""
-
-""" 
-Agente del cliente
-"""
-
 import socket
 import sys
 import csv
@@ -17,30 +9,33 @@ import time
 import logging
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
+"""
+Clase (y programa principal) para un cliente-servidor
+"""
 
-
-# Tendremos que tener una variable donde se guarde el XML
-FicheroXML = sys.argv[1]
-# El metodo que se va a ejecutar
-Metodo = sys.argv[2]
-# Dependiendo del metodo, tendremos una opcion diferente
-if Metodo == REGISTER
-    TiempoExpiracion = sys.argv[3]
-elif Metodo == INVITE
-    Usuario = sys.argv[3]
-else Metodo == BYE
-    UsuarioDesconectado = sys.argv[3]
-# Creamos las variables de forma global para poder utilizarlas durante el prog.
 
 class UAClientHandler(ContentHandler):
 
     """
     User Agent del cliente
-    """    
     """
-    Vamos a crear una funcion que se encargue de crear un diccionario con 
+    """
+    Vamos a crear una funcion que se encargue de crear un diccionario con
     las etiquetas del archivo XML para ir guardando los datos.
     """
+    # Tendremos que tener una variable donde se guarde el XML
+    FicheroXML = sys.argv[1]
+    # El metodo que se va a ejecutar
+    Metodo = sys.argv[2]
+    # Dependiendo del metodo, tendremos una opcion diferente
+    if Metodo == REGISTER
+        TiempoExpiracion = sys.argv[3]
+    elif Metodo == INVITE
+        Usuario = sys.argv[3]
+    else Metodo == BYE
+        UsuarioDesconectado = sys.argv[3]
+    # Creamos las variables global para poder utilizarlas durante el prog.
+
     def __init__(self):
 
         self.listaEtiquetas = []
@@ -52,10 +47,10 @@ class UAClientHandler(ContentHandler):
                                   'audio': ['path']}
 
     """
-    Vamos a tener que inicializar todos los elementos(etiquetas) del 
+    Vamos a tener que inicializar todos los elementos(etiquetas) del
     diccionario creado anteriormente
     """
-    def InicializacionElementos(self,name,attrs):
+    def InicializacionElementos(self, name, attrs):
         # Buscaremos las etiquetas en el diccionario
         if name in self.diccionarioConfig:
             Valores = {}
@@ -72,6 +67,10 @@ class UAClientHandler(ContentHandler):
     ContraseñaUsuario = handler.listaEtiquetas[0]['account']['password']
     PuertoServidor = handler.listaEtiquetas[1]['uaserver']['puerto']
 
+    """
+    Una vez inicializadas, tendremos que crear alguna funcion que nos permita
+    acceder a las etiquetas
+    """
     def get_tags(self):
         # Nos tendrá que devolver la lista segun como este
         return self.listaEtiquetas
@@ -87,36 +86,17 @@ class UAClientHandler(ContentHandler):
         linea = str(tiempo) + ' ' + mensaje + '\r\n'
         fichero.write(linea)
         fichero.close()
-        print(linea)     
+        print(linea)
 
-    """
-    Una vez inicializadas, tendremos que crear alguna funcion que nos permita
-    acceder a las etiquetas
-    """
-    parser =make_parser()
-    cHandler = UAClientHandler()
-    parser.setContentHandler(cHandler)
-    parser.parse(open(FicheroXML)
-
-    """
-    Como vamos a tener que estar constantemente enviando los mensajes, 
-    crearemos un metodo para solo tener que llamar al metodo.
-    """
     def envioMensajes(self, mensaje):
         my_socket.send(bytes(mensaje, 'utf-8'))
 
-    """
-    El cliente se tiene que registrar, tendrá que hacer la invitación de la
-    llamada, realizar los ack al proxy y desconectarse, por tanto los podriamos
-    implementar como metodos.
-    """
     def registrar(self, TiempoExpiracion):
 
         if Metodo == 'REGITER':
             c = 'Expires: ' + str(TiempoExpiracion) + '\r\n\r\n'
-            cabeceraRegistro = self.Metodo + 'sip: ' + 
-                               self.listaEtiquetas['uaserver']['puerto'] + \ 
-                               ' SIP/2.0\r\n'
+            cabeceraRegistro = self.Metodo + 'sip: ' + \
+            self.listaEtiquetas['uaserver']['puerto'] + ' SIP/2.0\r\n'
             lineaEnvio = cabeceraRegistro + c
             self.envioMensaje(lineaEnvio)
             print(lineaEnvio)
@@ -124,18 +104,14 @@ class UAClientHandler(ContentHandler):
             mensajeServidor = my_socket.recv(1024).decode('utf-8')
             print('El servidor manda: ' + mensajeServidor)
             """
-            Ahora es cuando se registrara el usuario, por tanto tendra que 
-            facilitar una contraseña. Que a su vez tambien tendremos que 
+            Ahora es cuando se registrara el usuario, por tanto tendra que
+            facilitar una contraseña. Que a su vez tambien tendremos que
             guardar en el archivo log. Se tendra que utilizar una funcion hash
             """
             MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
             MensajeLog = MensajeEnviado + mensajeServidor
             self.archivoLog(MensajeLog)
             if mensajeServidor == 'SIP/2.0 401 Unauthorized'
-                """
-                Al ser autorizado, en la cabecera se tendrá que enviar el 
-                tiempo de expiracion mas una cabecera con utenticacion
-                """
                 nonce = mensajeServidor.split('"')[1]
                 # Ahora tendremos que utilizar la funcion hash
                 respuesta = hashlib.sha1()
@@ -155,24 +131,25 @@ class UAClientHandler(ContentHandler):
                 # Ahora habra uqe guardar un registro en el archivo log.
                 MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
                 MensajeLog = MensajeEnviado + mensajeServidor + ':' + \
-                             CabeceraNueva + '\r\n'
+                CabeceraNueva + '\r\n'
                 self.archivoLog(MensajeLog)
                 # Ahora el servidor nos habra aceptado y recibiremos el 200 OK
                 mensajeServidor = my_socket.recv(1024).decode('utf-8')
                 print('El servidor manda: ' + mensajeServidor)
-                
+
     def invitar(self, Usuario):
         """
         La cabecera acabara con Content-Type: application/sdp y el sdp
         """
         if Metodo == 'INVITE':
             tipo = 'Content-Type: application/sdp\r\n\r\n'
-            sdp = 'v=0\r\n' + 'o=' + listaEtiquetas['account']['username']+\ 
-            ' ' + diccionarioConfig['uaserver']['ip'] + 's=misesion\r\n' + \
-            't=0\r\n'  + 'm=audio ' + listaEtiquetas['rtpaudio']['puerto']+\
-            ' RTP\r\n'
+            sdp = 'v=0\r\n' + 'o=' + listaEtiquetas['account']['username'] + \
+                    ' ' + diccionarioConfig['uaserver']['ip'] + \
+                    's=misesion\r\n' + \
+                    't=0\r\n' + 'm=audio ' + \
+                    listaEtiquetas['rtpaudio']['puerto'] + ' RTP\r\n'
             lineaEnvio = Metodo + ' sip:' + Usuario + ' SIP/2.0\r\n' + tipo + \
-            sdp
+                            sdp
             self.envioMensaje(lineaEnvio)
             print('Mensaje enviado: ' + lineaEnvio)
 
@@ -184,7 +161,6 @@ class UAClientHandler(ContentHandler):
             # y tendrá que esperar una respuesta del servidor
             mensajeServidor = my_socket.recv(1024).decode('utf-8')
             print('El servidor manda: ' + mensajeServidor)
-            
 
     def asentimiento(self, Usuario):
         if Metodo == 'ACK':
@@ -212,28 +188,25 @@ class UAClientHandler(ContentHandler):
 
 if __name__ == "__main__":
 
-    # Tendremos que crear el socket 
+    # Tendremos que crear el socket
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
-    # Esta vez en vez de anudarlo a un servidor, lo haremos al Proxy
-    my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    my_socket.connect((listaEtiquetas['regproxy']['ip'], 
-                       int(listaEtiquetas['regproxy']['puerto']))
-
-    # El programa tendrá que actuar segun el metodo que haya recibido
-    
-    if len(sys.argv) != 4:
-        sys.exit('Usege: python uaclient.py config method option')
-
-    # Crear trazas de inicio en el archivo log para saber cuando empieza prog.
-    handler.archivoLog('Inicio... ')
-    if Metedo == 'REGISTER'
-        hanler.registrar(TiempoExpiracion)
-    elif Metodo == 'INVITE'
-        handler.invita(Usuario)
-    else Metodo == 'BYE'
-        handler.desconexion(Ususario)
-        my_socket.close()
-        print('Fin de conexion')
-    handler.archivoLog('Terminamos...' + ' ')
-    
-    
+        my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        my_socket.connect((listaEtiquetas['regproxy']['ip'],
+        int(listaEtiquetas['regproxy']['puerto']))
+        if len(sys.argv) != 4:
+            sys.exit('Usege: python uaclient.py config method option')
+        parser = make_parser()
+        cHandler = UAClientHandler()
+        parser.setContentHandler(cHandler)
+        parser.parse(open(FicheroXML)
+        # Crear trazas de inicio en el archivo log para saber cuando empieza prog.
+        handler.archivoLog('Inicio... ')
+        if Metedo == 'REGISTER'
+            hanler.registrar(TiempoExpiracion)
+        elif Metodo == 'INVITE'
+            handler.invita(Usuario)
+        else Metodo == 'BYE'
+            handler.desconexion(Ususario)
+            my_socket.close()
+            print('Fin de conexion')
+        handler.archivoLog('Terminamos...' + ' ')
