@@ -260,4 +260,3 @@ if __name__ == "__main__":
         except:
             # Cuando se interrumpa, se enviara la traza al fichero log
             handler.archivoLog('Terminamos... ')
-

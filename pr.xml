@@ -1,15 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
     <server>
-        <name></name>
+        <name>TheJocker@pr.org</name>
         <ip>127.0.0.1</ip>
         <puerto>23032</puerto>
     </server>
     <database>
-        <path></path>
-        <passwdpath></passwordpath>
+        <path>BaseDeDatos.txt</path>
+        <passwdpath>passwords.txt</passwordpath>
     </database>
     <log>
-        <path></path>
+        <path>log.json</path>
     </log>
 </configure>
