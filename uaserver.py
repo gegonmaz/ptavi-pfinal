@@ -86,7 +86,7 @@ class UAServerHandler(ContentHandler):
         linea = str(tiempo) + ' ' + mensaje + '\r\n'
         fichero.write(linea)
         fichero.close()
-        print(linea)
+        print(linea[:-1])
 
     def envioMensajes(self, mensaje):
         my_socket.send(bytes(mensaje, 'utf-8'))
@@ -208,9 +208,20 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 # INVITE --> tendremos que establecer la llamada(Comunicacion)
                 envio = ("SIP/2.0 100 Trying\r\n\r\nSIP/2.0 180 Ring\r\n\r\n" +
                          "SIP/2.0 200 OK\r\n\r\n")
+                envio += 'Content-Type: application/sdp\r\n\r\n'
+                sdp = ('v=0\r\n' + 'o=' + \
+                        self.listaEtiquetas['account']['username'] + \
+                        ' ' + self.listaEtiquetas['uaserver']['ip'] + \
+                        's=misesion\r\n' + \
+                        't=0\r\n' + 'm=audio ' + \ 
+                        self.listaEtiquetas['rtpaudio']['puerto'] + \
+                        ' RTP\r\n\r\n')               
+                envio += envio + sdp
                 self.wfile.write(bytes(envio, 'utf-8'))
             elif Mensaje_Cliente[0] == 'ACK':
-                os.system("./mp32rtp -i " + IP_Cliente + " -p 23032 <" + audio)
+                os.system("./mp32rtp -i " + I127.0.0.1 + " -p " + \
+                            self.listaEtiquetas['rtpaudio']['puerto'] + \
+                            "<" + audio)
             elif Mensaje_Cliente[0] == 'BYE':
                 # BYE --> se cierra la comunicación
                 envio = self.wfile.write(b'SIP/2.0 200 Ok\r\n\r\n')
@@ -223,25 +234,30 @@ class EchoHandler(socketserver.DatagramRequestHandler):
 
 if __name__ == "__main__":
 
+    parser = make_parser()
+    cHandler = UASeverHandler()
+    parser.setContentHandler(cHandler)
+    parser.parse(open(FicheroXML)
+    # Aqui tendremos que tener en cuenta la existencia de dos parametros
+    try:
+        IpUsuario = handler.listaEtiquetas['uaserver']['ip']
+        Puerto = handler.listaEtiquetas['uaserver'][['puerto']
+        serv = socketserver.UDPServer((IpUsuario, puerto), EchoHandler)
+    except:
+        sys.exit('Usage: python server.py Ip&Port cancion.mp3')
+
+    handler.archivoLog('Empezamos...')
     # Tendremos que crear el socket
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         my_socket.connect((listaEtiquetas['regproxy']['ip'],
         int(listaEtiquetas['regproxy']['puerto']))
-        if len(sys.argv) != 4:
-            sys.exit('Usege: python uaclient.py config method option')
-        parser = make_parser()
-        cHandler = UAClientHandler()
-        parser.setContentHandler(cHandler)
-        parser.parse(open(FicheroXML)
-        # Crear trazas de inicio en el archivo log para saber cuando empieza prog.
-        handler.archivoLog('Inicio... ')
-        if Metedo == 'REGISTER'
-            hanler.registrar(TiempoExpiracion)
-        elif Metodo == 'INVITE'
-            handler.invita(Usuario)
-        else Metodo == 'BYE'
-            handler.desconexion(Ususario)
-            my_socket.close()
-            print('Fin de conexion')
-        handler.archivoLog('Terminamos...' + ' ')
+
+        handler.registrar()
+        try:
+            # Mientras este activo funcionara
+            serv.serve_forever()
+        except:
+            # Cuando se interrumpa, se enviara la traza al fichero log
+            handler.archivoLog('Terminamos... ')
+
