@@ -75,16 +75,14 @@ User Agent del cliente
     Tendremos que crear un archivo log; de modo que si cae el servicio,
     se pueda saber que usuarios estaban contectados en cada momento
     """
-    def archivoLog(File, Message)
+    def archivoLog(self, amensaje):
         # Primero aseguramos si existe algún fichero ya
-        ficheroLectura = open(File, 'r')
-        lineas = fichero.readlines
-        ficheroLectura.close()
-        lineas.append(str(time.time()) + '' + Message)
-        # Escribimos en el fichero
-        ficheroEscritura = open(File, 'w')
-        ficheroEscritura(''.join(lienas))
-        ficheroEscritura.close()
+        fichero = open(self.listaEtiquetas['log']['path'], 'a')
+        tiempo = time.strtime('%Y%m%H%M%S', time.gmtime(time.time()))
+        linea = str(tiempo) + ' ' + mensaje + '\r\n'
+        fichero.write(linea)
+        fichero.close()
+        print(linea)     
 
     """
     Una vez inicializadas, tendremos que crear alguna funcion que nos permita
@@ -107,7 +105,7 @@ User Agent del cliente
     Como vamos a tener que estar constantemente enviando los mensajes, 
     crearemos un metodo para solo tener que llamar al metodo.
     """
-    def envioMensajes(self, mensaje)
+    def envioMensajes(self, mensaje):
         my_socket.send(bytes(mensaje, 'utf-8'))
 
     """
@@ -139,7 +137,7 @@ User Agent del cliente
                 tiempo de expiracion mas una cabecera con utenticacion
                 """
                 
-    def invitar(self, Usuario)
+    def invitar(self, Usuario):
         """
         La cabecera acabara con Content-Type: application/sdp y el sdp
         """
@@ -158,15 +156,18 @@ User Agent del cliente
             datos = my_socket.recv(1024)
             
 
-    def asentimiento(self, Usuario)
+    def asentimiento(self, Usuario):
         if Metodo == 'ACK':
             lineaEnvio = 'ACK sip:' + Usuario + ' SIP72.0'
             self.envioMensaje(lineaEnvio)
             print('Asentimiento: ' + lineaEnvio)
 
-    def desconexion(self, Usuario)
+    def desconexion(self, Usuario):
         if Metodo == 'BYE':
-            lineaEnvio = 'BYE
+            lineaEnvio = 'BYE sip:' + Usuario + 'SIP/2.0'
+            self.envioMensaje(lineaEnvio)
+            print('Se desconecto: ' lineaEnvio)
+            datos = my_socket.recv(1024)
 
 if __name__ == "__main__":
 
