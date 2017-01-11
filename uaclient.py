@@ -201,6 +201,9 @@ if __name__ == "__main__":
         parser.parse(open(FicheroXML)
         # Crear trazas de inicio en el archivo log para saber cuando empieza prog.
         handler.archivoLog('Inicio... ')
+
+        Metodos = ['INVITE', 'BYE', 'ACK']
+
         if Metedo == 'REGISTER'
             hanler.registrar(TiempoExpiracion)
         elif Metodo == 'INVITE'
