@@ -109,7 +109,13 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             # Comprobamos el tamaño del paquete recibido
             if not line:
                 break
-            if Mensaje_Cliente[0] == 'INVITE':
+            if Mensaje_CLiente[0] == 'REGISTER':
+                """
+                Tendremos que comprobar si esta autorizado el usuario y 
+                'deshacer' el nonce 
+                """
+                
+            elif Mensaje_Cliente[0] == 'INVITE':
                 # INVITE --> tendremos que establecer la llamada(Comunicacion)
                 envio = ("SIP/2.0 100 Trying\r\n\r\nSIP/2.0 180 Ring\r\n\r\n" +
                          "SIP/2.0 200 OK\r\n\r\n")
