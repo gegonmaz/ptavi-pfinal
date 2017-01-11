@@ -34,15 +34,13 @@ else Metodo == BYE
 
 class UAClientHandler(ContentHandler):
 
-"""
-User Agent del cliente
-"""
-
+    """
+    User Agent del cliente
+    """    
     """
     Vamos a crear una funcion que se encargue de crear un diccionario con 
     las etiquetas del archivo XML para ir guardando los datos.
     """
-
     def __init__(self):
 
         self.listaEtiquetas = []
@@ -66,6 +64,13 @@ User Agent del cliente
             listaNombres = {name: Valores}
             self.listaEtiquetas.append(listaNombres)
 
+    # Variables que necesitaremos en los siguientes metodos
+    IpProxy = handler.listaEtiquetas[3]['regproxy']['ip']
+    PuertoProxy = handler.listaEtiquetas[3]['regproxy']['puerto']
+    ArchivoLog = handler.listaEtiquetas[4]['log']['path']
+    Usuario = handler.listaEtiquetas[0]['account']['username']
+    ContraseñaUsuario = handler.listaEtiquetas[0]['account']['password']
+    PuertoServidor = handler.listaEtiquetas[1]['uaserver']['puerto']
 
     def get_tags(self):
         # Nos tendrá que devolver la lista segun como este
@@ -75,7 +80,7 @@ User Agent del cliente
     Tendremos que crear un archivo log; de modo que si cae el servicio,
     se pueda saber que usuarios estaban contectados en cada momento
     """
-    def archivoLog(self, amensaje):
+    def archivoLog(self, mensaje):
         # Primero aseguramos si existe algún fichero ya
         fichero = open(self.listaEtiquetas['log']['path'], 'a')
         tiempo = time.strtime('%Y%m%H%M%S', time.gmtime(time.time()))
@@ -92,14 +97,6 @@ User Agent del cliente
     cHandler = UAClientHandler()
     parser.setContentHandler(cHandler)
     parser.parse(open(FicheroXML)
-    """
-    # Variables que necesitaremos en los siguientes metodos
-    IpProxy = handler.listaEtiquetas[3]['regproxy']['ip']
-    PuertoProxy = handler.listaEtiquetas[3]['regproxy']['puerto']
-    ArchivoLog = handler.listaEtiquetas[4]['log']['path']
-    Usuario = handler.listaEtiquetas[0]['account']['username']
-    ContraseñaUsuario = handler.listaEtiquetas[0]['account']['password']
-    """
 
     """
     Como vamos a tener que estar constantemente enviando los mensajes, 
@@ -117,7 +114,7 @@ User Agent del cliente
 
         if Metodo == 'REGITER':
             c = 'Expires: ' + str(TiempoExpiracion) + '\r\n\r\n'
-            cabeceraRegistro = Metodo + 'sip: ' + 
+            cabeceraRegistro = self.Metodo + 'sip: ' + 
                                self.listaEtiquetas['uaserver']['puerto'] + \ 
                                ' SIP/2.0\r\n'
             lineaEnvio = cabeceraRegistro + c
@@ -131,11 +128,38 @@ User Agent del cliente
             facilitar una contraseña. Que a su vez tambien tendremos que 
             guardar en el archivo log. Se tendra que utilizar una funcion hash
             """
+            MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
+            MensajeLog = MensajeEnviado + mensajeServidor
+            self.archivoLog(MensajeLog)
             if mensajeServidor == 'SIP/2.0 401 Unauthorized'
                 """
                 Al ser autorizado, en la cabecera se tendrá que enviar el 
                 tiempo de expiracion mas una cabecera con utenticacion
                 """
+                nonce = mensajeServidor.split('"')[1]
+                # Ahora tendremos que utilizar la funcion hash
+                respuesta = hashlib.sha1()
+                respuesta.update(bytes(listaEtiquetas['account']['password'], \
+                                       'utf-8'))
+                respueta.update(bytes(nonce, 'utf-8'))
+                respuesta = respuesta.hexdigest()
+
+                # Ahora se tendra que  dar la respuesta con la autorizacion
+                CabeceraNueva = 'REGISTER sip:' + self.Usuario + \
+                                self.PuertoServidor
+                CabeceraNueva += ' SIP/2.0\r\n' + 'Expires: ' + \
+                                 TiempoExpiracion + '\r\n'
+                CabeceraNueva += 'Authorization: Digest response=' + \
+                                 self.respuesta + '\r\n'
+                self.envioMensaje(CabeceraNueva)
+                # Ahora habra uqe guardar un registro en el archivo log.
+                MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
+                MensajeLog = MensajeEnviado + mensajeServidor + ':' + \
+                             CabeceraNueva + '\r\n'
+                self.archivoLog(MensajeLog)
+                # Ahora el servidor nos habra aceptado y recibiremos el 200 OK
+                mensajeServidor = my_socket.recv(1024).decode('utf-8')
+                print('El servidor manda: ' + mensajeServidor)
                 
     def invitar(self, Usuario):
         """
@@ -143,17 +167,23 @@ User Agent del cliente
         """
         if Metodo == 'INVITE':
             tipo = 'Content-Type: application/sdp\r\n\r\n'
-            sdp = 'v=0\r\n' + 'o=' + diccionarioConfig['account']['username']+\ 
+            sdp = 'v=0\r\n' + 'o=' + listaEtiquetas['account']['username']+\ 
             ' ' + diccionarioConfig['uaserver']['ip'] + 's=misesion\r\n' + \
-            't=0\r\n'  + 'm=audio ' + diccionarioConfig['rtpaudio']['puerto']+\
+            't=0\r\n'  + 'm=audio ' + listaEtiquetas['rtpaudio']['puerto']+\
             ' RTP\r\n'
             lineaEnvio = Metodo + ' sip:' + Usuario + ' SIP/2.0\r\n' + tipo + \
             sdp
             self.envioMensaje(lineaEnvio)
             print('Mensaje enviado: ' + lineaEnvio)
 
+            # Tendra que guardar las trazas de la invitacion a la conversacion
+            MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
+            MensajeLog = MensajeEnviado + lineaEnvio + ':' + '\r\n'
+            self.archivoLog(MensajeLog)
+
             # y tendrá que esperar una respuesta del servidor
-            datos = my_socket.recv(1024)
+            mensajeServidor = my_socket.recv(1024).decode('utf-8')
+            print('El servidor manda: ' + mensajeServidor)
             
 
     def asentimiento(self, Usuario):
@@ -162,11 +192,22 @@ User Agent del cliente
             self.envioMensaje(lineaEnvio)
             print('Asentimiento: ' + lineaEnvio)
 
+            # Guardamos trazas
+            MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
+            MensajeLog = MensajeEnviado + lineaEnvio + ':' + '\r\n'
+            self.archivoLog(MensajeLog)
+
     def desconexion(self, Usuario):
         if Metodo == 'BYE':
             lineaEnvio = 'BYE sip:' + Usuario + 'SIP/2.0'
             self.envioMensaje(lineaEnvio)
             print('Se desconecto: ' lineaEnvio)
+
+            # Guardamos trazas
+            MensajeEnviado = 'Mensaje enviado por: ' + IpProxy + IpPuerto
+            MensajeLog = MensajeEnviado + lineaEnvio + ':' + '\r\n'
+            self.archivoLog(MensajeLog)
+
             datos = my_socket.recv(1024)
 
 if __name__ == "__main__":
@@ -174,10 +215,25 @@ if __name__ == "__main__":
     # Tendremos que crear el socket 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
     # Esta vez en vez de anudarlo a un servidor, lo haremos al Proxy
-    my_socket.connect((diccionarioConfig['regproxy']['ip'], 
-                       int(diccionarioConfig['regproxy']['puerto']))
+    my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    my_socket.connect((listaEtiquetas['regproxy']['ip'], 
+                       int(listaEtiquetas['regproxy']['puerto']))
 
     # El programa tendrá que actuar segun el metodo que haya recibido
     
     if len(sys.argv) != 4:
         sys.exit('Usege: python uaclient.py config method option')
+
+    # Crear trazas de inicio en el archivo log para saber cuando empieza prog.
+    handler.archivoLog('Inicio... ')
+    if Metedo == 'REGISTER'
+        hanler.registrar(TiempoExpiracion)
+    elif Metodo == 'INVITE'
+        handler.invita(Usuario)
+    else Metodo == 'BYE'
+        handler.desconexion(Ususario)
+        my_socket.close()
+        print('Fin de conexion')
+    handler.archivoLog('Terminamos...' + ' ')
+    
+    
