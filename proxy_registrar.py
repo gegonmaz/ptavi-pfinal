@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import socket
-import socketserver
-import sys
-import csv
-import urllib.request
-import hushlib
-import time
-from xml.sax import make_parser
-from xml.sax.handler import ContentHandler
+imPUERTO socket
+imPUERTO socketserver
+imPUERTO sys
+imPUERTO csv
+imPUERTO urllib.request
+imPUERTO hushlib
+imPUERTO time
+from xml.sax imPUERTO make_parser
+from xml.sax.handler imPUERTO ContentHandler
 
 class ProxyRegistraHandler(ContentHandler):
 
@@ -18,6 +18,11 @@ class ProxyRegistraHandler(ContentHandler):
     """
     Vamos a crear una funcion que se encargue de crear un diccionario con
     las etiquetas del archivo XML para ir guardando los datos.
+    """
+
+    """
+    Vamos a hacernos un esquema rapido de conceptos
+    """
     """
     # Tendremos que tener una variable donde se guarde el XML
     FicheroXML = sys.argv[1]
@@ -31,25 +36,44 @@ class ProxyRegistraHandler(ContentHandler):
     else Metodo == BYE
         UsuarioDesconectado = sys.argv[3]
     # Creamos las variables global para poder utilizarlas durante el prog.
+    """
 
     def __init__(self):
 
         self.listaEtiquetas = []
+
         self.diccionarioConfig = {'server': ['name', 'ip', 'puerto'],
-                                  'database': ['path', 'passwdpath'],
+                                  'datosbase': ['path', 'passwdpath'],
                                   'log': ['path']}
-        self.DataBase = 'BaseDeDatos.txt'
+
+        self.BaseDatos = 'BaseDeDatos.txt'
+
+        self.MENSAJES = ["SIP/2.0 100 Trying",
+                        "SIP/2.0 180 Ring",
+                        "SIP/2.0 200 OK",
+                        "SIP/2.0 400 Bad Request",
+                        "SIP/2.1 401 Unauthorized",
+                        "SIP/2.0 401 Unauthorized",
+                        "SIP/2.0 404 User Not Found",
+                        "SIP/2.0 405 metodo Not Allowed"]
+        #Funcion NONCE
+        self.NONCE = str(random.getrandbits(100))
+
+        self.Invititacion = ""
+
     """
     Vamos a tener que inicializar todos los elementos(etiquetas) del
     diccionario creado anteriormente
     """
-    def InicializacionElementos(self, name, attrs):
+
+    def InicializacionElementos(self, nombre, atributos):
+
         # Buscaremos las etiquetas en el diccionario
-        if name in self.diccionarioConfig:
+        if nombre in self.diccionarioConfig:
             Valores = {}
             for etiquetas in self.diccionarioConfig[name]:
-                Valores[name] = attrs.get(etiquetas, '')
-            listaNombres = {name: Valores}
+                Valores[etiquetas] = atributos.get(etiquetas, '')
+            listaNombres = {nombre: Valores}
             self.listaEtiquetas.append(listaNombres)
 
     # Variables que necesitaremos en los siguientes metodos
@@ -74,75 +98,203 @@ class ProxyRegistraHandler(ContentHandler):
     """
     def archivoLog(self, mensaje):
         # Primero aseguramos si existe algún fichero ya
-        fichero = open(self.listaEtiquetas['log']['path'], 'a')
-        tiempo = time.strtime('%Y%m%H%M%S', time.gmtime(time.time()))
-        linea = str(tiempo) + ' ' + mensaje + '\r\n'
-        fichero.write(linea)
+        fichero = open(self.listaEtiquetas[2]['log']['path'], 'a')
+        tiempo = time.strtime('%Y%m%d%H%M%S', time.gmtime(time.time()))
+        lineaa = str(tiempo) + ' ' + mensaje + '\r\n'
+        Correccionlineaa = Correccionlineaa.replace("\r\n", " ") + "\r\n"
+        if mensaje == "":
+            Correccionlineaa = "\r\n"
+        fichero.write(Correccionlineaa)
         fichero.close()
-        print(linea[:-1])
+        """fichero.write(lineaa)
+        fichero.close()"""
 
-    def baseDeDatos( self, archivo)
-        archivoDatos = open(self.DataBase, 'r')
-        linea = archivo.readLines()
-        for l en linea:
-            if linea.split(':')[0] == archivo.split(':')[0]:
+        "vamos a imprimir las trazas(lo que se encuentra en el fichero)"
+        print(Correccionlineaa[:-1])
+
+    def BaseDeDatos( self, archivo):
+        """Nos aseguraremos primero que no este creado ya el archivo en local"""
+        EnLocal =False
+
+        archivoDatos = open(self.datosBase, 'r+')
+        lineaa = archivoDatos.readlineaas()
+        for l en lineaa:
+            if lineaa.split(':')[0] == mensaje.split(':')[0]:
                 encontrado = True
             if not encontrado:
                 archivoDatos.write(archivo + '\r\n')
-        archivo.Datos.close()
+        archivoDatos.close()
 
-class EchoHandler(socketserver.DatagramRequestHandler):
+class EchoHandler(socketserver.datosgramRequestHandler):
     """
     Echo server class
     """
-    Metodos = ['INVITE', 'BYE', 'ACK']
+
+     def VerificarContra(self, usuario, Respuesta):
+
+        """Buscamos usuarios en contraseñas
+        creamos respuesta y
+        comparamos las dos para ver si son iguales"""
+
+         encontrado = False
+         contraseña = open(handler.Trunk[1]["datosbase"]["passwdpath"], 'r')
+         lineaasNuevas = contraseña.readlineaas()
+         for lineaa in lineaasNuevas:
+             usuario = lineaa.split(" ")[0]
+             if user_reg == usuario:
+                 contraseña_reg = lineaa.split(" ")[1]
+                 msm = hashlib.sha1()
+                 msm.update(bytes(contraseña_reg[:-1] + handler.NONCE, 'utf-8'))
+                 RegistroRespuesta = msm.hexdigest()
+                 if Respuesta == RegistroRespuesta:
+                     encontrado = True
+         contraseña.close()
+         return encontrado
+
+     def IP_PUERTO(self, Usuario):
+         BaseDatos = open(handler.datosBase, 'r')
+         lineaas = datosbase.readlineaas()
+         for lineaa in lineaas:
+             lineaaUsuario = lineaa.split(":")[0]
+             if lineaaUsuario == Usuario:
+                 lineaaIP = lineaa.split(":")[1]
+                 lineaaPUERTO = lineaa.split(":")[2]
+                 IP_PUERTO = (LienaIP, int(lineaaPUERTO))
+         BaseDatos.close()
+         return(IP_PUERTO)
 
     def handle(self):
+        """
+        Es la clase que se utilizara para la recepcion y el envio de mensajes
+        """
+
         while 1:
             # Leyendo línea a línea lo que nos envía el cliente
-            line = self.rfile.read()
-            print("El cliente nos manda " + line.decode('utf-8'))
+            lineaa = self.rfile.read()
+            print("El cliente nos manda " + lineaa.decode('utf-8'))
             # Partimos el mensaje
             # Tendremos que guardar la traza
-            Mensaje_Cliente = line.decode('utf-8').split()
-            # Analizamos la linea para ver que metodo nos llega y contestar
+            Mensaje_Cliente = lineaa.decode('utf-8').split()
+            # Analizamos la lineaa para ver que metodo nos llega y contestar
             # Comprobamos el tamaño del paquete recibido
-            if not line:
+            if not lineaa:
                 break
-            if Mensaje_CLiente[0] == 'REGISTER':
-                """
-                Tendremos que comprobar si esta autorizado el usuario y 
-                'deshacer' el nonce 
-                """
-                
-            elif Mensaje_Cliente[0] == 'INVITE':
-                # INVITE --> tendremos que establecer la llamada(Comunicacion)
-                envio = ("SIP/2.0 100 Trying\r\n\r\nSIP/2.0 180 Ring\r\n\r\n" +
-                         "SIP/2.0 200 OK\r\n\r\n")
-                envio += 'Content-Type: application/sdp\r\n\r\n'
-                sdp = ('v=0\r\n' + 'o=' + \
-                        self.listaEtiquetas['account']['username'] + \
-                        ' ' + self.listaEtiquetas['uaserver']['ip'] + \
-                        's=misesion\r\n' + \
-                        't=0\r\n' + 'm=audio ' + \ 
-                        self.listaEtiquetas['rtpaudio']['puerto'] + \
-                        ' RTP\r\n\r\n')               
-                envio += envio + sdp
-                self.wfile.write(bytes(envio, 'utf-8'))
-            elif Mensaje_Cliente[0] == 'ACK':
-                os.system("./mp32rtp -i " + I127.0.0.1 + " -p " + \
-                            self.listaEtiquetas['rtpaudio']['puerto'] + \
-                            "<" + audio)
-            elif Mensaje_Cliente[0] == 'BYE':
-                # BYE --> se cierra la comunicación
-                envio = self.wfile.write(b'SIP/2.0 200 Ok\r\n\r\n')
-            if not Mensaje_Cliente[0] in self.Metodos:
-                # if not Mensaje_Cliente[0] == 'INVITE'|'BYE'|'ACK':
-                envio = self.wfile.write((b'SIP/2.0 405 Method Not Allowed') +
-                                         (b'\r\n\r\n'))
-            else:
-                envio = self.wfile.write(b'SIP/2.0 400 Bad Request\r\n\r\n')
 
+             IP = self.client_address[0]
+             PUERTO = self.client_address[1]
+             metodo = lineaa[:lineaa.find(" ")]
+             MetodosEncontrados = ['REGISTER', 'INVATE', 'BYE', 'ACK']
+
+             #Guardarlo en PROXY_LOG.TXT
+             handler.archivoLog("Recibiendo de ... " + IP + ":" + str(PUERTO) + ": " + lineaa)
+             #Gestión dependidento del método
+
+            if metodo == 'REGISTER':
+                """
+                Tendremos que comprobar si esta autorizado el usuario y
+                'deshacer' el nonce
+                """
+                 #Mensaje tipo register
+                 verificar = lineaa[lineaa.find("Authorization")]
+                 if verificar == "0":
+                     #Mensaje sin datos de Registro
+                     mensaje = handler.MENSAJES[4] + '\r\nWWW Authenticate: Digest nonce="' + handler.NONCE + '"\r\n\r\n'
+                     self.wfile.write(bytes(mensaje, 'utf-8'))
+                     handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + mensaje)
+                 else:
+                     #Mensaje con los datos obtenidos del metodo Registro
+                     mensajeLista = lineaa.split('\r\n')
+                     usuario = mensajeLista[0].split(":")[1]
+                     respuesta = mensajeLista[2].split('"')[1]
+                     if self.VerificarContra(usuario, respuesta):
+                         #Tupla usuario contraseña encontrado.
+                         mensaje = handler.MENSAJES[2] + "\r\n\r\n"
+                         self.wfile.write(bytes(mensaje, 'utf-8'))
+                         handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + mensaje)
+
+                         #Los usuarios ya estan autenticados.
+                         #Ahora los tenemos que guardar en la base de datos.
+
+                         lineaaNueva = lineaa.split(":")
+                         Usuario = lineaaNueva[1]
+                         PuertoUsuario = lineaaNueva[2].split(" ")[0]
+                         Tiempo = time.strftime("%Y%m%d%H%M%S", time.gmtime(time.time()))
+                         TiempoExpirado = new_lineaa[3].split("\r\n")[0][1:]
+                         DatosUsuario = User + ":" + IP + ":" + PUERTO_user + ":" + Time + ":" + Exp_Time
+                         handler.BaseDeDatos(DatosUsuario)
+                     else:
+                         #Tupla usuario contraseña no encontrado.
+                         mensaje = handler.MENSAJES[5] + "\r\n\r\n"
+                         self.wfile.write(bytes(mensaje, 'utf-8'))
+                         handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + mensaje)
+
+             elif metodo == "INVITE":
+                 # INVITE --> tendremos que establecer la llamada(Comunicacion)
+
+                 handler.Invititacion = lineaa.split("o=")[1].split("\r\n")[0]
+
+                 UsuarioReceptor = lineaa.split(" ")[1][4:]
+
+                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                 my_socket.connect(self.IP_PUERTO(UsuarioReceptor))
+                 my_socket.send(bytes(linea, 'utf-8'))
+
+                 IP = self.IP_PUERTO(UsuarioReceptor)[0]
+                 PUERTO = self.IP_PUERTO(UsuarioReceptor)[1]
+                    handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + linea)
+
+                 datos = my_socket.recv(1024)
+                 datosRecibidos = datos.decode("utf-8")
+
+                 handler.archivoLog("Recibiendo de ... " + IP + ":" + str(PUERTO) + ": " + datosRecibidos)
+
+                 self.wfile.write(bytes(datosRecibidos, 'utf-8'))
+
+                 IP = self.client_address[0]
+                 PUERTO = self.client_address[1]
+                 handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + datosRecibidos)
+
+             elif metodo == "ACK":
+                 UsuarioReceptor = linea.split(" ")[1][4:]
+
+                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                 my_socket.connect(self.IP_PUERTO(UsuarioReceptor))
+                 my_socket.send(bytes(linea, 'utf-8'))
+
+                 IP = self.IP_PUERTO(UsuarioReceptor)[0]
+                 PUERTO = self.IP_PUERTO(UsuarioReceptor)[1]
+                 handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + linea)
+
+             elif metodo == "BYE":
+                 UsuarioReceptor = linea.split(" ")[1][4:]
+
+                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                 my_socket.connect(self.IP_PUERTO(UsuarioReceptor))
+                 my_socket.send(bytes(linea, 'utf-8'))
+
+                IP = self.IP_PUERTO(UsuarioReceptor)[0]
+                PUERTO = self.IP_PUERTO(UsuarioReceptor)[1]
+                handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + linea)
+
+                datos = my_socket.recv(1024)
+                datosRecibidos = datos.decode("utf-8")
+                handler.archivoLog("Recibiendo de ... " + IP + ":" + str(PUERTO) + ": " + datosRecibidos)
+
+                self.wfile.write(bytes(datosRecibidos, 'utf-8'))
+
+                IP = self.client_address[0]
+                PUERTO = self.client_address[1]
+                handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + datosRecibidos)
+
+            elif metodo not in Metodos:
+                mensaje = handler.MENSAJES[6]
+                self.wfile.write(bytes(mensaje, 'utf-8'))
+                handler.archivoLog("Enviando a ... " + IP + ":" + str(PUERTO) + ": " + mensaje)
+
+            
 if __name__ == "__main__":
 
     parser = make_parser()
@@ -155,7 +307,7 @@ if __name__ == "__main__":
         Puerto = handler.listaEtiquetas['uaserver'][['puerto']
         serv = socketserver.UDPServer((IpUsuario, puerto), EchoHandler)
     except:
-        sys.exit('Usage: python server.py Ip&Port cancion.mp3')
+        sys.exit('Usage: python server.py Ip&PUERTO cancion.mp3')
 
     handler.archivoLog('Empezamos...')
     # Tendremos que crear el socket
