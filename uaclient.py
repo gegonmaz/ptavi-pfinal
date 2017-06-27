@@ -23,6 +23,7 @@ class UAClientHandler(ContentHandler):
     Vamos a crear una funcion que se encargue de crear un diccionario con
     las etiquetas del archivo XML para ir guardando los datos.
     """
+    """
     # Tendremos que tener una variable donde se guarde el XML
     FicheroXML = sys.argv[1]
     # El metodo que se va a ejecutar
@@ -35,7 +36,7 @@ class UAClientHandler(ContentHandler):
     else Metodo == BYE
         UsuarioDesconectado = sys.argv[3]
     # Creamos las variables global para poder utilizarlas durante el prog.
-
+    """
     def __init__(self):
 
         self.listaEtiquetas = []
@@ -59,6 +60,7 @@ class UAClientHandler(ContentHandler):
             listaNombres = {name: Valores}
             self.listaEtiquetas.append(listaNombres)
 
+    """
     # Variables que necesitaremos en los siguientes metodos
     IpProxy = handler.listaEtiquetas[3]['regproxy']['ip']
     PuertoProxy = handler.listaEtiquetas[3]['regproxy']['puerto']
@@ -66,14 +68,74 @@ class UAClientHandler(ContentHandler):
     Usuario = handler.listaEtiquetas[0]['account']['username']
     ContraseñaUsuario = handler.listaEtiquetas[0]['account']['password']
     PuertoServidor = handler.listaEtiquetas[1]['uaserver']['puerto']
+    """
 
     """
     Una vez inicializadas, tendremos que crear alguna funcion que nos permita
     acceder a las etiquetas
     """
-    def get_tags(self):
+    def obtenerEtiquetas(self):
         # Nos tendrá que devolver la lista segun como este
-        return self.listaEtiquetas
+        """Devuelve los datos, con formato, obtenidos de "ua1.xml"."""
+        doc = ""
+        for dict_listaEtiquetas in self.listaEtiquetas:
+            for key in dict_listaEtiquetas:
+                doc = doc + key + "\t"
+                for k_2 in dict_listaEtiquetas[key]:
+                    doc = doc + k_2 + '="' + dict_listaEtiquetas[key][k_2] + '"' + "\t"
+                doc = doc + "\n"
+
+        return doc
+    def recibirMensaje(self):
+        u"""Método para mediante el cual recibiremos los mensajes Recibir."""
+        try:
+            data = my_socket.recv(1024)
+        except:
+            log_txt = "Error: servidor no alcanzado " + proxy_ip
+            log_txt += " puerto " + proxy_port + "\r\n"
+            handler.to_log_txt(log_txt)
+            sys.exit()
+
+        #Guardamos en el LOG.
+        proxy_ip = handler.listaEtiquetas[3]["regproxy"]["ip"]
+        proxy_port = handler.listaEtiquetas[3]["regproxy"]["puerto"]
+        data_rcv = data.decode("utf-8")
+        log_ip_port = "recibirMensaje de " + proxy_ip + ":" + proxy_port + ": "
+        data_log = log_ip_port + data_rcv
+        self.to_log_txt(data_log)
+
+        #Respuesta No Autorizado.
+        if data_rcv[:11] == "SIP/2.0 401":
+            nonce = data_rcv[data_rcv.find('"')+1:data_rcv.rfind('"')]
+            m = hashlib.sha1()
+            PASSWORD = self.listaEtiquetas[0]["account"]["passwd"]
+
+            m.update(bytes(PASSWORD + nonce, 'utf-8'))
+            Dig_resp = m.hexdigest()
+
+            acc_username = self.listaEtiquetas[0]["account"]["username"]
+            serv_port = self.listaEtiquetas[1]["uaserver"]["puerto"]
+
+            #Nuevo Mensaje con info de registro.
+            head_register = "REGISTER sip:" + acc_username + ":" + serv_port
+            head_register += " SIP/2.0\r\nExpires: " + OPTION
+            head_register += '\r\nAuthorization: Digest response="'
+            head_register += Dig_resp + '"' + "\r\n\r\n"
+            self.send(head_register)
+
+            #Guardamos en el LOG.
+            log_msg = "Sent to " + self.listaEtiquetas[3]["regproxy"]["ip"] + ":"
+            log_msg += self.listaEtiquetas[3]["regproxy"]["puerto"]
+            log_msg += ": " + head_register
+            self.to_log_txt(log_msg)
+
+            #Recibiremos OK.
+            self.recibirMensaje()
+
+        #Recibimos TRYING/RINGING/OK.
+        elif data_rcv[:11] == "SIP/2.0 100":
+            self.Ack(OPTION)
+
 
     """
     Tendremos que crear un archivo log; de modo que si cae el servicio,
